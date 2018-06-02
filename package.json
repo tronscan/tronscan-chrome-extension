@@ -1,0 +1,36 @@
+{
+  "name": "tronscan-chrome-plugin",
+  "version": "0.0.1",
+  "description": "Tronscan Transaction Signer",
+  "scripts": {
+    "build": "node utils/build.js",
+    "start": "node utils/webserver.js"
+  },
+  "dependencies": {
+    "@tronscan/client": "^0.2.2",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "bootstrap": "^4.1.1",
+    "lockr": "^0.8.4",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "react-intl": "^2.4.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.17.0",
+    "babel-loader": "^6.2.4",
+    "babel-preset-react": "^6.16.0",
+    "clean-webpack-plugin": "^0.1.17",
+    "copy-webpack-plugin": "^4.2.0",
+    "css-loader": "^0.25.0",
+    "file-loader": "^0.11.2",
+    "fs-extra": "^0.30.0",
+    "html-loader": "^0.4.5",
+    "html-webpack-plugin": "2.24.1",
+    "react-hot-loader": "^4.0.1",
+    "style-loader": "^0.13.0",
+    "webpack": "2.2.1",
+    "webpack-dev-server": "^2.3.0",
+    "write-file-webpack-plugin": "3.4.2"
+  }
+}
