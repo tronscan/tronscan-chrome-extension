@@ -1,3 +1,5 @@
+console.log("Tronscan Extension Active");
+
 window.addEventListener("message", function(event) {
 
   if (event.source !== window)

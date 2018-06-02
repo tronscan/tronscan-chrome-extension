@@ -1,17 +1,15 @@
 import '../img/icon-128.png';
 import '../img/icon-34.png';
 import {wrapStore} from 'react-chrome-redux';
-
 import configureStore from "./redux/store";
+import {byteArray2hexStr} from "@tronscan/client/src/utils/bytes";
+import {hexStr2byteArray} from "@tronscan/client/src/lib/code";
+import {Transaction} from "@tronscan/client/src/protocol/core/Tron_pb";
+import {signTransaction} from "@tronscan/client/src/utils/crypto";
 
 const { store } = configureStore();
 
 wrapStore(store, {portName: 'TRONSCAN_EXT'});
-
-const {byteArray2hexStr} = require("@tronscan/client/src/utils/bytes");
-const hexStr2byteArray = require("@tronscan/client/src/lib/code").hexStr2byteArray;
-const {Transaction} = require("@tronscan/client/src/protocol/core/Tron_pb");
-const {signTransaction} = require("@tronscan/client/src/utils/crypto");
 
 chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
 
@@ -33,6 +31,13 @@ chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
     case "TRONSCAN_PING":
       sendResponse({
         type: "TRONSCAN_PONG",
+      });
+      break;
+
+    case "TRONSCAN_REQUEST_ACCOUNT":
+      sendResponse({
+        type: "TRONSCAN_ACCOUNT_RESPONSE",
+        account: store.getState().account,
       });
       break;
   }
