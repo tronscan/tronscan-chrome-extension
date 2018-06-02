@@ -15,15 +15,11 @@ const {signTransaction} = require("@tronscan/client/src/utils/crypto");
 
 chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
 
-  console.log("BACKGROUND MESSAGE", request);
-
   switch (request.type) {
     case "TRONSCAN_TRANSACTION":
       let bytesDecode = hexStr2byteArray(request.transaction.hex);
       let transaction = Transaction.deserializeBinary(bytesDecode);
       let privateKey = store.getState().privateKey;
-
-      console.log("USING PK", privateKey);
 
       let { transaction: signedTransaction } = signTransaction(privateKey, transaction);
 
