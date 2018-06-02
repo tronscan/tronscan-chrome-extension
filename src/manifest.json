@@ -8,7 +8,6 @@
     "persistent": true
   },
   "permissions": [
-    "<all_urls>",
     "*://*/*",
     "activeTab",
     "tabs",
@@ -35,8 +34,7 @@
     "matches": [
       "*://*.tronscan.org/*",
       "*://localhost/*",
-      "http://localhost/*",
-      "<all_urls>"
+      "http://localhost/*"
     ]
   },
   "content_scripts": [{

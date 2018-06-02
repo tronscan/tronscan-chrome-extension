@@ -2,27 +2,27 @@ import React from "react";
 import {hot} from "react-hot-loader";
 import {Client} from "@tronscan/client";
 import {pkToAddress} from "@tronscan/client/src/utils/crypto";
-import Lockr from "lockr";
+import {connect} from "react-redux";
+import {logout, setAccount, setPrivateKey} from "../redux/actions";
 
 const ONE_TRX = 1000000;
 
-const background = chrome.extension.getBackgroundPage();
+function Link({href, children, ...props}) {
+  return (
+    <a href="javascript:;" onClick={() => chrome.tabs.create({url: href})} {...props}>
+      {children}
+    </a>
+  )
+}
 
 class Main extends React.Component {
 
   constructor(props) {
     super(props);
 
-    // this.fileRef = React.createRef();
-
     this.state = {
       privateKey: "",
-      activePrivateKey: Lockr.get("activePrivateKey", ""),
-      account: Lockr.get("account", null),
-      isLoggedIn: Lockr.get("isLoggedIn", false),
     };
-
-    background.privateKey = this.state.activePrivateKey;
 
     this.client = new Client({
       apiUrl: "https://api.tronscan.org"
@@ -43,54 +43,32 @@ class Main extends React.Component {
     return true;
   };
 
-  componentDidMount() {
-
-  }
-
   login = () => {
 
     let {privateKey} = this.state;
 
     if (this.isLoginValid()) {
       this.client.getAccountByAddress(pkToAddress(privateKey)).then(account => {
-        Lockr.set("activePrivateKey", privateKey);
-        Lockr.set("isLoggedIn", true);
-        Lockr.set("account", account);
-        background.privateKey = privateKey;
-        this.setState({
-          activePrivateKey: privateKey,
-          isLoggedIn: true,
-          account,
-        });
+        console.log("GOT ACCOUNT", account);
+        this.props.setAccount(account);
+        this.props.setPrivateKey(privateKey);
       });
     }
   };
 
   logout = () => {
-    this.setState({
-      activePrivateKey: null,
-      isLoggedIn: false,
-    });
-    background.privateKey = null;
+    this.props.logout();
   };
-
-  onFileSelected() {
-
-  }
-
-  selectFile() {
-
-  }
 
   render () {
 
-    let {message, isLoggedIn, account} = this.state;
+    let {walletOpen, account} = this.props;
 
     return (
       <div>
         <div className="card border-0" style={{width: 320}}>
           {
-            isLoggedIn ?
+            walletOpen ?
               <div className="card-body p-1">
                 <div className="px-1 py-1">
                   <div className="row">
@@ -102,7 +80,7 @@ class Main extends React.Component {
                       </span>
                     </div>
                   </div>
-                  <a href="https://api.tronscan.org/#/account" className="btn btn-dark btn-block btn-sm">Account</a>
+                  <Link href="https://tronscan.org/#/account" className="btn btn-dark btn-block btn-sm">Account</Link>
                 </div>
                 {
                   account.representative.enabled && (
@@ -111,19 +89,19 @@ class Main extends React.Component {
                     </div>
                   )
                 }
-                <li className="dropdown-divider"/>
-                <a className="dropdown-item" href="https://api.tronscan.org/#/account">
+                <hr/>
+                <Link className="dropdown-item" href="https://tronscan.org/#/account">
                   <i className="fa fa-credit-card mr-2"/>
                   {account.balance / ONE_TRX} TRX
-                </a>
-                <a className="dropdown-item" href="https://api.tronscan.org/#/account">
+                </Link>
+                <Link className="dropdown-item" href="https://tronscan.org/#/account">
                   <i className="fa fa-bolt mr-2"/>
                   {account.frozen.total / ONE_TRX} Tron Power
-                </a>
-                <a className="dropdown-item" href="https://api.tronscan.org/#/account">
+                </Link>
+                <Link className="dropdown-item" href="https://tronscan.org/#/account">
                   <i className="fa fa-tachometer-alt mr-2"/>
                   {account.bandwidth.netRemaining} Bandwidth
-                </a>
+                </Link>
                 <hr />
                 <div className="px-2 pt-1">
                   <button className="btn btn-danger btn-block" onClick={this.logout}>Sign Out</button>
@@ -145,11 +123,27 @@ class Main extends React.Component {
                 </button>
               </div>
           }
-
         </div>
       </div>
     )
   }
 }
 
-export default hot(module)(Main)
+const mapStateToProps = state => {
+  return {
+    privateKey: state.privateKey,
+    account: state.account,
+    walletOpen: state.walletOpen,
+  };
+};
+
+const mapDispatchToProps = {
+  setPrivateKey,
+  setAccount,
+  logout,
+};
+
+export default hot(module)(connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Main));
