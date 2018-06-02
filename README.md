@@ -1,4 +1,7 @@
 <h1 align="center">
+  <br>
+  <img width="40%" src="https://raw.githubusercontent.com/tron-explorer/docs/master/images/tron-banner.png">
+  <br>
   Tronscan Chrome Extension
   <br>
 </h1>
