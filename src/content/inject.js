@@ -7,12 +7,24 @@ window.addEventListener("message", function(event) {
 
   if (event.data.type && (event.data.type.substr(0, 9) === "TRONSCAN_")) {
 
-    chrome.runtime.sendMessage(event.data, function(response) {
-      let messageToPage = Object.assign({
-        callbackId: event.data.callbackId,
-      }, response);
+    console.log("INJECT", event.data);
 
-      window.postMessage(messageToPage, "*");
-    });
+    chrome.runtime.sendMessage(event.data);
+  }
+});
+
+chrome.extension.onMessage.addListener(async (request) => {
+
+
+  console.log("INJECT RESPONSE", request);
+
+  if (request._source === "bg") {
+  console.log("INJECT FORWARD SEND", request);
+    let messageToPage = Object.assign({
+      _source: "inject",
+      callbackId: request.callbackId,
+    }, request);
+
+    window.postMessage(messageToPage, "*");
   }
 });

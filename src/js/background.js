@@ -6,27 +6,63 @@ import {byteArray2hexStr} from "@tronscan/client/src/utils/bytes";
 import {hexStr2byteArray} from "@tronscan/client/src/lib/code";
 import {Transaction} from "@tronscan/client/src/protocol/core/Tron_pb";
 import {signTransaction} from "@tronscan/client/src/utils/crypto";
+import SignService from "./services/signService";
 
 const { store } = configureStore();
 
 wrapStore(store, {portName: 'TRONSCAN_EXT'});
+let signService = new SignService();
 
-chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
+chrome.notifications.onButtonClicked.addListener((callback, buttonIndex) => {
+  if (buttonIndex === 0) {
+    signService.requests[callback].resolve(true);
+  } else {
+    signService.requests[callback].reject();
+  }
+});
+
+chrome.extension.onMessage.addListener(async (request, sender) => {
+
+  console.log("BACKGROUND REQUEST", request);
+
+  function sendResponse(responseData) {
+    responseData = Object.assign({
+      callbackId: request.callbackId,
+      _source: "bg",
+    }, responseData);
+
+    // TODO querying tabs using this method isn't reliable
+    chrome.tabs.query({ currentWindow: true, active: true, }, (tabs) => {
+      chrome.tabs.sendMessage(tabs[0].id, responseData);
+    });
+  }
 
   switch (request.type) {
     case "TRONSCAN_TRANSACTION":
+
       let bytesDecode = hexStr2byteArray(request.transaction.hex);
       let transaction = Transaction.deserializeBinary(bytesDecode);
-      let privateKey = store.getState().privateKey;
 
-      let { transaction: signedTransaction } = signTransaction(privateKey, transaction);
+      try {
 
-      sendResponse({
-        type: "TRONSCAN_TRANSACTION_RESPONSE",
-        transaction: {
-          hex: byteArray2hexStr(signedTransaction.serializeBinary()),
-        }
-      });
+      await signService.requestSign(transaction);
+        let privateKey = store.getState().privateKey;
+
+        let { transaction: signedTransaction } = signTransaction(privateKey, transaction);
+
+        sendResponse({
+          type: "TRONSCAN_TRANSACTION_RESPONSE",
+          transaction: {
+            hex: byteArray2hexStr(signedTransaction.serializeBinary()),
+          }
+        });
+      } catch(e) {
+        sendResponse({
+          type: "TRONSCAN_TRANSACTION_RESPONSE",
+          rejected: true,
+        });
+      }
+
       break;
     case "TRONSCAN_PING":
       sendResponse({
