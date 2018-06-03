@@ -1,6 +1,9 @@
 {
-  "name": "Tronscan Signer",
+  "name": "Tronscan",
   "options_page": "options.html",
+  "omnibox": {
+    "keyword" : "tron"
+  },
   "background": {
     "scripts": [
       "background.bundle.js"

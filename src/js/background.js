@@ -41,6 +41,41 @@ chrome.extension.onMessage.addListener((request, sender, sendResponse) => {
       });
       break;
   }
-
-
 });
+
+
+function navigateTo(url) {
+  chrome.tabs.update({ url });
+}
+
+
+// This event is fired with the user accepts the input in the omnibox.
+chrome.omnibox.onInputEntered.addListener((text) => {
+
+  let [category, value] = text.split(":");
+
+  switch (category) {
+    case "trx":
+      navigateTo('https://tronscan.org/#/transaction/' + value);
+      break;
+    case "block":
+      navigateTo('https://tronscan.org/#/block/' + value);
+      break;
+    case "token":
+      navigateTo('https://tronscan.org/#/token/' + value);
+      break;
+    case "address":
+      navigateTo('https://tronscan.org/#/address/' + value);
+      break;
+  }
+});
+
+chrome.omnibox.onInputChanged.addListener((text, suggest) => {
+  suggest([
+    {content: "address:" + text, description: "Address: " + text},
+    {content: "trx:" + text, description: "Transaction" + text},
+    {content: "block:" + text, description: "Block" + text},
+    {content: "token:" + text, description: "Token" + text},
+  ]);
+});
+
